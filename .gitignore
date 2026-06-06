@@ -1,0 +1,92 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Secrets & environment — NEVER commit. Only *.env.example (placeholders) is tracked.
+# ─────────────────────────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+!*.env.example
+
+# Firebase / Google Cloud service accounts & client config
+*serviceAccount*.json
+*service-account*.json
+firebase-adminsdk*.json
+google-services.json
+GoogleService-Info.plist
+
+# AWS / cloud credentials
+.aws/
+aws-credentials*
+*.pem
+
+# Signing material
+*.keystore
+*.jks
+*.p12
+*.p8
+*.mobileprovision
+key.properties
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Node / NestJS backend (apps/backend)
+# ─────────────────────────────────────────────────────────────────────────────
+node_modules/
+dist/
+build/
+coverage/
+.npm/
+.eslintcache
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Flutter / Dart mobile (apps/mobile)
+# ─────────────────────────────────────────────────────────────────────────────
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+
+# Generated sources — kept optional. Uncomment to ignore build_runner output.
+# *.g.dart
+# *.freezed.dart
+# *.config.dart
+
+# Android
+android/.gradle/
+android/captures/
+android/local.properties
+android/app/release/
+.gradle/
+
+# iOS / macOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/flutter_export_environment.sh
+ios/Runner/GeneratedPluginRegistrant.*
+**/Pods/
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Docker / local data volumes
+# ─────────────────────────────────────────────────────────────────────────────
+postgres-data/
+redis-data/
+*.local.yml
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Editors / OS cruft
+# ─────────────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

@@ -1,0 +1,14 @@
+node_modules
+dist
+coverage
+.git
+.gitignore
+.env
+.env.*
+*.log
+Dockerfile
+.dockerignore
+README.md
+test
+*firebase-adminsdk*.json
+service-account*.json

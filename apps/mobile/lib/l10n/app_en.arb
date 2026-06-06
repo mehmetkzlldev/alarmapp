@@ -1,0 +1,434 @@
+{
+  "@@locale": "en",
+  "appTitle": "AI Alarm",
+  "commonSave": "Save",
+  "commonCancel": "Cancel",
+  "commonDelete": "Delete",
+  "commonRetry": "Retry",
+  "commonOk": "OK",
+  "commonDone": "Done",
+  "commonClose": "Close",
+  "timeAm": "AM",
+  "timePm": "PM",
+  "dayShortSun": "Sun",
+  "dayShortMon": "Mon",
+  "dayShortTue": "Tue",
+  "dayShortWed": "Wed",
+  "dayShortThu": "Thu",
+  "dayShortFri": "Fri",
+  "dayShortSat": "Sat",
+  "dayLetterSun": "S",
+  "dayLetterMon": "M",
+  "dayLetterTue": "T",
+  "dayLetterWed": "W",
+  "dayLetterThu": "T",
+  "dayLetterFri": "F",
+  "dayLetterSat": "S",
+  "missionDifficultyEasy": "Easy",
+  "missionDifficultyMedium": "Medium",
+  "missionDifficultyHard": "Hard",
+  "alarmListTitle": "Alarms",
+  "alarmNewTitle": "New alarm",
+  "alarmEditTitle": "Edit alarm",
+  "alarmListLoadError": "Something went wrong loading your alarms.",
+  "alarmActionFailed": "Action failed. Try again.",
+  "alarmListEmpty": "No alarms yet. Tap \"{buttonLabel}\" to add one.",
+  "@alarmListEmpty": {
+    "placeholders": {
+      "buttonLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "alarmDeleteTitle": "Delete alarm?",
+  "alarmDeleteConfirm": "\"{label}\" will be permanently removed.",
+  "@alarmDeleteConfirm": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "alarmDefaultLabel": "Alarm",
+  "alarmLabelField": "Label",
+  "alarmRepeatLabel": "Repeat",
+  "alarmSoundHapticsLabel": "Sound & haptics",
+  "alarmSoundField": "Sound",
+  "alarmVibration": "Vibration",
+  "alarmSnoozeLabel": "Snooze",
+  "alarmAllowSnooze": "Allow snooze",
+  "alarmSnoozeInterval": "Interval",
+  "alarmSnoozeIntervalSuffix": "min",
+  "alarmMaxSnoozes": "Max snoozes",
+  "alarmMaxSnoozesSuffix": "x",
+  "alarmActive": "Active",
+  "alarmSoundDefault": "Default",
+  "alarmSoundGentleChimes": "Gentle chimes",
+  "alarmSoundMorningBirds": "Morning birds",
+  "alarmSoundClassicBell": "Classic bell",
+  "alarmSoundRooster": "Rooster",
+  "alarmUpgradeTitle": "Upgrade required",
+  "alarmUpgradeBody": "{message}\n\nFree accounts are limited to a few alarms. Upgrade to Premium for unlimited alarms and AI missions.",
+  "@alarmUpgradeBody": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "alarmUpgradeNotNow": "Not now",
+  "alarmUpgradeSeePlans": "See plans",
+  "alarmRepeatOnce": "Once",
+  "alarmRepeatEveryDay": "Every day",
+  "alarmBadgeMath": "Math · {difficulty}",
+  "@alarmBadgeMath": {
+    "placeholders": {
+      "difficulty": {
+        "type": "String"
+      }
+    }
+  },
+  "alarmBadgeShake": "Shake · {difficulty}",
+  "@alarmBadgeShake": {
+    "placeholders": {
+      "difficulty": {
+        "type": "String"
+      }
+    }
+  },
+  "alarmBadgePhoto": "Photo · {difficulty}",
+  "@alarmBadgePhoto": {
+    "placeholders": {
+      "difficulty": {
+        "type": "String"
+      }
+    }
+  },
+  "alarmBadgePhotoTarget": "Photo: {target}",
+  "@alarmBadgePhotoTarget": {
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "alarmBadgeUnknown": "Unknown",
+  "alarmMissionsTitle": "Missions",
+  "alarmMissionAdd": "Add",
+  "alarmMissionsEmpty": "No missions. The alarm can be dismissed with one tap.",
+  "alarmMissionAddSheetTitle": "Add mission",
+  "alarmMissionMathTitle": "Math problem",
+  "alarmMissionShakeTitle": "Shake",
+  "alarmMissionPhotoTitle": "Photograph an object",
+  "alarmMissionMathDesc": "Solve equations to dismiss",
+  "alarmMissionShakeDesc": "Shake the phone to dismiss",
+  "alarmMissionPhotoDesc": "Take a photo of a real-world object",
+  "alarmMissionRemove": "Remove mission",
+  "alarmMissionTargetObject": "Target object",
+  "dashGoodMorning": "Good morning",
+  "dashAllAlarms": "All alarms",
+  "dashTryChallengeTitle": "Try the wake-up challenge",
+  "dashTryChallengeSubtitle": "Shake 10s → math → camera. Experience it now.",
+  "dashNextAlarm": "Next alarm",
+  "dashNoActiveAlarms": "No active alarms",
+  "dashAlarmMissionCount": "{label} · {count, plural, =1{1 mission} other{{count} missions}}",
+  "@dashAlarmMissionCount": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dashAiMissionUnavailable": "Today's AI mission is unavailable.",
+  "dashAiMissionTitle": "Today's AI mission",
+  "dashAiMissionUnlock": "Unlock daily AI missions with Premium.",
+  "dashGoPremium": "Go Premium",
+  "dashAiMissionNone": "No mission for today yet. Check back later.",
+  "dashThisWeek": "This week",
+  "dashStatsUnavailable": "Stats unavailable",
+  "dashStatAvgSleep": "Avg sleep",
+  "dashStatConsistency": "Consistency",
+  "dashStatMissions": "Missions",
+  "dashDurationHm": "{h}h {m}m",
+  "@dashDurationHm": {
+    "placeholders": {
+      "h": {
+        "type": "int"
+      },
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "dashNavAlarmsTitle": "Alarms",
+  "dashNavAlarmsSubtitle": "View and manage your alarms",
+  "authWelcomeBackTitle": "Welcome back",
+  "authWelcomeBackSubtitle": "Sign in to keep your mornings on track.",
+  "authEmailLabel": "Email",
+  "authPasswordLabel": "Password",
+  "authPasswordRequired": "Password is required",
+  "authSignInButton": "Sign in",
+  "authNoAccountPrompt": "Don't have an account?",
+  "authCreateOneButton": "Create one",
+  "authLoginFailed": "Login failed. Please try again.",
+  "authRegisterTitle": "Create account",
+  "authRegisterSubtitle": "Start waking up smarter.",
+  "authDisplayNameLabel": "Display name",
+  "authConfirmPasswordLabel": "Confirm password",
+  "authCreateAccountButton": "Create account",
+  "authHaveAccountPrompt": "Already have an account?",
+  "authRegistrationFailed": "Registration failed. Please try again.",
+  "authGenericError": "Something went wrong. Please try again.",
+  "authShowPassword": "Show password",
+  "authHidePassword": "Hide password",
+  "authEmailRequired": "Email is required",
+  "authEmailInvalid": "Enter a valid email address",
+  "authPasswordMinLength": "Password must be at least {n} characters",
+  "@authPasswordMinLength": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "authPasswordComplexity": "Use at least one letter and one number",
+  "authConfirmPasswordRequired": "Please confirm your password",
+  "authPasswordsDoNotMatch": "Passwords do not match",
+  "authDisplayNameRequired": "Display name is required",
+  "authDisplayNameTooShort": "Display name is too short",
+  "authDisplayNameTooLong": "Display name is too long",
+  "ringWakeUpExclaim": "Wake up!",
+  "missionStepOfTotal": "Mission {step} of {total}  ·  {kind}",
+  "@missionStepOfTotal": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "missionKindShake": "Shake",
+  "missionKindMath": "Math",
+  "missionKindCamera": "Camera",
+  "missionAlarmDismissed": "Alarm dismissed",
+  "missionHaveAGreatDay": "Have a great day! ☀️",
+  "missionRetry": "Retry",
+  "missionSolveToDismiss": "Solve to dismiss",
+  "missionAnswerHint": "Answer",
+  "missionSubmit": "Submit",
+  "missionEnterANumber": "Enter a number.",
+  "missionWrongAnswer": "Wrong answer. Here is a new problem.",
+  "missionFailedToLoadProblem": "Failed to load problem.",
+  "missionShakeStart": "SHAKE!",
+  "missionShakeNice": "NICE!",
+  "missionTapAsFast": "Tap as fast as you can to shake",
+  "missionKeepShaking": "Keep shaking your phone",
+  "missionShakeDone": "Done!",
+  "missionShakeRemaining": "{remaining} s",
+  "@missionShakeRemaining": {
+    "placeholders": {
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "missionShakeCount": "shakes: {count}",
+  "@missionShakeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "missionKeepGoing": "Keep going!",
+  "missionShakeToRun": "Shake to run the timer…",
+  "missionPointCameraAt": "Point the camera at",
+  "missionTakePhotoOfYour": "Take a photo of your",
+  "missionAnyObject": "ANY OBJECT",
+  "objToothbrush": "Toothbrush",
+  "objSink": "Sink",
+  "objCoffeeMug": "Coffee Mug",
+  "objKeys": "Keys",
+  "objShoes": "Shoes",
+  "objLaptop": "Laptop",
+  "missionCameraOpenError": "Could not open the camera. Check permissions.",
+  "missionDoesNotLookLike": "That does not look like a {target}. Try again.",
+  "@missionDoesNotLookLike": {
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "missionOpeningCamera": "Opening camera…",
+  "missionAnalyzing": "Analyzing…",
+  "missionTryAgain": "Try again",
+  "missionVerified": "Verified",
+  "missionOpenCamera": "Open camera",
+  "missionAnalyzingYourPhoto": "Analyzing your photo…",
+  "missionUploadingAndChecking": "Uploading and checking…",
+  "missionObjectDetected": "Object detected! ✓",
+  "missionConfirmedSure": "Confirmed! ({percent}% sure)",
+  "@missionConfirmedSure": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "missionNotDetectedConfidence": "Not detected ({percent}% confidence)",
+  "@missionNotDetectedConfidence": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "missionSaw": "Saw: {objects}",
+  "@missionSaw": {
+    "placeholders": {
+      "objects": {
+        "type": "String"
+      }
+    }
+  },
+  "missionAnyObjectHint": "Get out of bed and snap anything you see.",
+  "missionSpecificObjectHint": "Point your camera at the object and capture.",
+  "ringWakeUp": "Wake up!",
+  "ringAlarm": "Alarm",
+  "ringSnoozeLimitReached": "Snooze limit reached",
+  "ringCouldNotLoadAlarm": "Could not load alarm. You can still snooze or stop.",
+  "ringCompleteMissionToStop": "Complete your mission to stop the alarm",
+  "ringStartMission": "Start mission",
+  "ringSnoozeWithDetails": "Snooze ({minutes}m · {remaining} left)",
+  "@ringSnoozeWithDetails": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "remaining": {
+        "type": "int"
+      }
+    }
+  },
+  "ringWakeUpLoud": "WAKE UP!",
+  "ringCompleteEveryMission": "Complete every mission to stop the alarm",
+  "ringImAwakeStartMissions": "I'm awake — start missions",
+  "ringExitDemo": "Exit demo",
+  "ringChipShake": "Shake",
+  "ringChipMath": "Math",
+  "ringChipCamera": "Camera",
+  "ringChipUnknown": "?",
+  "settingsTitle": "Settings",
+  "settingsProfile": "Profile",
+  "settingsDisplayName": "Display name",
+  "settingsDisplayNameHint": "Your name",
+  "settingsEmail": "Email",
+  "settingsTimezone": "Timezone",
+  "settingsTimezoneNotSet": "Not set",
+  "settingsSelectTimezone": "Select timezone",
+  "settingsCancel": "Cancel",
+  "settingsSave": "Save",
+  "settingsNotifications": "Notifications",
+  "settingsAlarmNotifications": "Alarm notifications",
+  "settingsAlarmNotificationsSubtitle": "Show notifications when alarms fire",
+  "settingsDailyMissionReminders": "Daily mission reminders",
+  "settingsDailyMissionRemindersSubtitle": "Remind me when my AI mission is ready",
+  "settingsProductAnnouncements": "Product announcements",
+  "settingsProductAnnouncementsSubtitle": "Occasional news and tips",
+  "settingsSubscription": "Subscription",
+  "settingsPremium": "Premium",
+  "settingsFreePlan": "Free plan",
+  "settingsPremiumSubtitle": "You have access to all premium features",
+  "settingsFreePlanSubtitle": "Upgrade for AI missions and sleep insights",
+  "settingsManage": "Manage",
+  "settingsUpgrade": "Upgrade",
+  "settingsAccount": "Account",
+  "settingsLogOut": "Log out",
+  "settingsLogOutConfirmTitle": "Log out?",
+  "settingsLogOutConfirmBody": "You will need to sign in again to use the app.",
+  "statsTitle": "Statistics",
+  "statsUpsellMessage": "Unlock detailed sleep and mission analytics with Premium.",
+  "statsLoadError": "Failed to load statistics.",
+  "statsSleepDuration": "Sleep duration",
+  "statsSleepDurationSubtitle": "Hours per night",
+  "statsMissionSuccessRate": "Mission success rate",
+  "statsMissionSuccessRateSubtitle": "Percent of missions cleared",
+  "statsConsistency": "Consistency",
+  "statsConsistencySubtitle": "How regular your schedule is",
+  "statsAvgSleep": "Avg sleep",
+  "statsMissions": "Missions",
+  "statsPercentValue": "{percent}%",
+  "@statsPercentValue": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "statsHoursAxis": "{hours}h",
+  "@statsHoursAxis": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "statsConsistencyBlurbExcellent": "Excellent — your schedule is very regular.",
+  "statsConsistencyBlurbDecent": "Decent — try to keep wake times steady.",
+  "statsConsistencyBlurbIrregular": "Irregular — aim for consistent sleep and wake times.",
+  "statsNoDataTitle": "No data yet",
+  "statsNoDataBody": "Use a few alarms and your sleep insights will appear here.",
+  "statsUpsellTitle": "Unlock your sleep insights",
+  "statsGoPremium": "Go Premium",
+  "statsRetry": "Retry",
+  "paywallGoPremium": "Go Premium",
+  "paywallLoadError": "Could not load plans. Please try again.",
+  "paywallChoosePlan": "Choose your plan",
+  "paywallHeaderTitle": "Wake up smarter with Premium",
+  "paywallHeaderSubtitle": "Unlock AI missions, advanced statistics, and unlimited alarms.",
+  "paywallFeatureAiMissionsTitle": "AI wake-up missions",
+  "paywallFeatureAiMissionsSubtitle": "A fresh, AI-generated mission every day to truly wake you up.",
+  "paywallFeatureStatsTitle": "Advanced sleep statistics",
+  "paywallFeatureStatsSubtitle": "Trends, consistency score, and mission success over time.",
+  "paywallFeatureUnlimitedAlarmsTitle": "Unlimited alarms",
+  "paywallFeatureUnlimitedAlarmsSubtitle": "Create as many alarms as you need — no free-tier cap.",
+  "paywallFeatureAllMissionTypesTitle": "All mission types",
+  "paywallFeatureAllMissionTypesSubtitle": "Unlock every mission, including object-detection challenges.",
+  "paywallBestValue": "BEST VALUE",
+  "paywallFreeTrial": "{days}-day free trial",
+  "@paywallFreeTrial": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "paywallContinue": "Continue",
+  "paywallContinueWithPrice": "Continue • {price}",
+  "@paywallContinueWithPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallPlansUnavailable": "Plans unavailable",
+  "paywallRestoring": "Restoring…",
+  "paywallRestorePurchases": "Restore purchases",
+  "paywallLegalDisclaimer": "Subscriptions auto-renew. Cancel anytime.",
+  "paywallTerms": "Terms",
+  "paywallPrivacy": "Privacy",
+  "paywallAlreadyPremiumTitle": "You are Premium",
+  "paywallAlreadyPremiumBody": "All premium features are unlocked. Thank you for your support!",
+  "paywallDone": "Done",
+  "paywallRetry": "Retry"
+}

@@ -1,0 +1,92 @@
+# Local development stack for the AI alarm clock backend.
+#
+#   docker-compose up -d          # start postgres + redis + backend
+#   docker-compose up -d postgres redis   # DB/cache only (run API on host)
+#   docker-compose logs -f backend
+#   docker-compose down           # stop (add -v to wipe data volumes)
+#
+# SECURITY: the values below are LOCAL DEV defaults only. Never reuse these
+# credentials in staging/production — there, inject secrets from a secrets
+# manager. GEMINI_API_KEY and all real secrets come from apps/backend/.env
+# (git-ignored), never from this file.
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: alarm_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-alarm}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-alarm_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-alarmdb}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      # The base schema is applied automatically on FIRST boot only (empty data dir).
+      # To re-apply after changes: `docker-compose down -v` then `up` again.
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-alarm} -d ${POSTGRES_DB:-alarmdb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7
+    container_name: alarm_redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    container_name: alarm_backend
+    restart: unless-stopped
+    # Pull real secrets (GEMINI_API_KEY, JWT secrets, AWS, Firebase) from this file.
+    # It is git-ignored; copy apps/backend/.env.example -> apps/backend/.env first.
+    env_file:
+      - ./apps/backend/.env
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${PORT:-3000}
+      # Service-to-service hostnames inside the compose network override any
+      # localhost values in .env so the API reaches the containers, not the host.
+      # NOTE: key names MUST match the backend config schema (DB_*, not DATABASE_*).
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${POSTGRES_USER:-alarm}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-alarm_dev_password}
+      DB_NAME: ${POSTGRES_DB:-alarmdb}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "${PORT:-3000}:${PORT:-3000}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      # API mounts everything under /api/v1 (global prefix + URI versioning).
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:'+(process.env.PORT||3000)+'/api/v1/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  postgres-data:
+  redis-data:

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Entitlements for the alarm engine.
+
+  The critical-alerts entitlement is ONLY effective once Apple approves your
+  request (https://developer.apple.com/contact/request/notifications-critical-alerts-entitlement/)
+  and your signing/provisioning profile includes it. Until then, keep it present
+  but expect the system to ignore critical behavior (alarms behave as normal
+  time-sensitive notifications).
+
+  See ALARM_README.md for the full setup.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>com.apple.developer.usernotifications.critical-alerts</key>
+    <true/>
+    <key>aps-environment</key>
+    <string>development</string>
+</dict>
+</plist>
