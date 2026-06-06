@@ -1,0 +1,32 @@
+name: Keep backend awake
+
+# Pings the Render backend's health endpoint so the free instance does not
+# spin down (Render sleeps after ~15 min idle → ~30-50s cold start otherwise).
+#
+# NOTE: GitHub may delay scheduled runs under load, so this greatly reduces but
+# does not 100% guarantee zero cold starts. For bulletproof uptime, also add an
+# external pinger (cron-job.org / UptimeRobot) hitting the same URL every 5 min.
+
+on:
+  schedule:
+    - cron: '*/10 * * * *' # every 10 minutes
+  workflow_dispatch: {} # allow manual run from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping /health (wake if asleep)
+        run: |
+          URL="https://alarm-backend-opd5.onrender.com/api/v1/health"
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 90 "$URL" || echo "000")
+            echo "Attempt $i -> HTTP $code"
+            if [ "$code" = "200" ]; then
+              echo "Backend is awake."
+              exit 0
+            fi
+            sleep 20
+          done
+          echo "Backend did not return 200 after retries (best-effort, not failing the job)."
+          exit 0
