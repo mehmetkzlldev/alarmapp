@@ -1,0 +1,87 @@
+# Codemagic CI/CD — build WakeUp AI in the cloud (no Mac required).
+# Sign up at https://codemagic.io, connect this GitHub repo; it auto-detects
+# this file. Pick a workflow and hit "Start new build".
+#
+# Workflows:
+#   ios-unsigned — compiles the iOS app WITHOUT signing. Verifies it BUILDS,
+#                  needs NO Apple account. Output is a .app (NOT installable on
+#                  a device — it just proves the code compiles on a real Mac).
+#   android      — builds the release APK (same as our local build).
+#   ios-release  — TEMPLATE (commented) for a signed, installable IPA. Needs an
+#                  Apple Developer account ($99/yr) + Codemagic code signing.
+
+workflows:
+  ios-unsigned:
+    name: iOS — compile check (unsigned, no Apple account)
+    instance_type: mac_mini_m1
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Flutter pub get
+        script: |
+          cd apps/mobile
+          flutter pub get
+      - name: Build iOS (no codesign)
+        script: |
+          cd apps/mobile
+          flutter build ios --release --no-codesign \
+            --dart-define=API_BASE_URL=https://alarm-backend-opd5.onrender.com/api/v1
+    artifacts:
+      - apps/mobile/build/ios/iphoneos/*.app
+
+  android:
+    name: Android — release APK
+    instance_type: linux_x2
+    max_build_duration: 60
+    environment:
+      flutter: stable
+    scripts:
+      - name: Flutter pub get
+        script: |
+          cd apps/mobile
+          flutter pub get
+      - name: Build APK
+        script: |
+          cd apps/mobile
+          flutter build apk --release --split-per-abi \
+            --dart-define=API_BASE_URL=https://alarm-backend-opd5.onrender.com/api/v1
+    artifacts:
+      - apps/mobile/build/app/outputs/flutter-apk/*.apk
+
+# -----------------------------------------------------------------------------
+# ios-release — a signed, INSTALLABLE IPA. Requires (all external to this repo):
+#   1. Apple Developer Program account ($99/yr).
+#   2. Codemagic code signing configured (Teams → Code signing identities):
+#      upload your distribution certificate + provisioning profile, OR connect
+#      an App Store Connect API key for automatic signing.
+#   3. A unique bundle id registered in your Apple account, set on the Runner
+#      target (currently com.alarmapp...; change to e.g. com.yourname.wakeupai).
+# Then uncomment this workflow and fill in the signing block.
+# -----------------------------------------------------------------------------
+#  ios-release:
+#    name: iOS — signed IPA
+#    instance_type: mac_mini_m1
+#    max_build_duration: 90
+#    environment:
+#      flutter: stable
+#      xcode: latest
+#      cocoapods: default
+#      ios_signing:
+#        distribution_type: ad_hoc          # ad_hoc (sideload/TestFlight-less) or app_store
+#        bundle_identifier: com.yourname.wakeupai
+#    scripts:
+#      - name: Set up signing
+#        script: xcode-project use-profiles
+#      - name: Flutter pub get
+#        script: cd apps/mobile && flutter pub get
+#      - name: Build signed IPA
+#        script: |
+#          cd apps/mobile
+#          flutter build ipa --release \
+#            --dart-define=API_BASE_URL=https://alarm-backend-opd5.onrender.com/api/v1 \
+#            --export-options-plist=/Users/builder/export_options.plist
+#    artifacts:
+#      - apps/mobile/build/ios/ipa/*.ipa

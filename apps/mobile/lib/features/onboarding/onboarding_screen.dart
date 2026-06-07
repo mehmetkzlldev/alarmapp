@@ -25,6 +25,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   String? _selected;
   bool _anonStarted = false;
   bool _finishing = false;
+  bool _flashing = false;
+  double _flashOpacity = 0;
 
   bool get _isTr => Localizations.localeOf(context).languageCode == 'tr';
   int get _total => kOnboardingQuestions.length;
@@ -78,26 +80,46 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _advance() {
-    setState(() {
-      _index++;
-      _selected = null;
+    _whiteTransition(() {
+      setState(() {
+        _index++;
+        _selected = null;
+      });
+      _pageController.jumpToPage(_index);
     });
-    _pageController.nextPage(
-      duration: const Duration(milliseconds: 320),
-      curve: Curves.easeInOut,
-    );
   }
 
   void _back() {
     if (_index == 0) return;
-    setState(() {
-      _index--;
-      _selected = null;
+    _whiteTransition(() {
+      setState(() {
+        _index--;
+        _selected = null;
+      });
+      _pageController.jumpToPage(_index);
     });
-    _pageController.previousPage(
-      duration: const Duration(milliseconds: 320),
-      curve: Curves.easeInOut,
-    );
+  }
+
+  /// Soft white dissolve between questions: fade a white sheet in, swap the
+  /// page underneath, then fade it back out.
+  Future<void> _whiteTransition(VoidCallback midpoint) async {
+    if (_flashing) return;
+    _flashing = true;
+    setState(() => _flashOpacity = 1);
+    await Future<void>.delayed(const Duration(milliseconds: 210));
+    if (!mounted) {
+      _flashing = false;
+      return;
+    }
+    midpoint();
+    await Future<void>.delayed(const Duration(milliseconds: 110));
+    if (!mounted) {
+      _flashing = false;
+      return;
+    }
+    setState(() => _flashOpacity = 0);
+    await Future<void>.delayed(const Duration(milliseconds: 230));
+    _flashing = false;
   }
 
   Future<void> _finish() async {
@@ -146,6 +168,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                   ),
                 ],
+              ),
+              IgnorePointer(
+                ignoring: _flashOpacity == 0,
+                child: AnimatedOpacity(
+                  opacity: _flashOpacity,
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeInOut,
+                  child: Container(color: Colors.white),
+                ),
               ),
               if (_finishing) _buildFinishingOverlay(),
             ],
