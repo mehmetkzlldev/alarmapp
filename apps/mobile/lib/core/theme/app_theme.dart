@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:alarmy/core/theme/app_colors.dart';
 
-/// Centralized Material 3 themes. The app defaults to dark (it's an alarm app —
-/// you'll often open it at night), but a light theme is provided for system
-/// preference.
+/// Centralized Material 3 themes. The app now defaults to the bright
+/// "Mango Sunrise" LIGHT theme (warm cream + orange/pink). A dark variant is
+/// kept as a fallback but the app forces light mode.
 class AppTheme {
   AppTheme._();
 
@@ -17,15 +17,15 @@ class AppTheme {
       seedColor: AppColors.seed,
       brightness: brightness,
       primary: AppColors.seed,
-      secondary: AppColors.sunrise,
-      surface: isDark ? AppColors.nightSurface : Colors.white,
+      secondary: AppColors.pink,
+      tertiary: AppColors.accent,
+      surface: isDark ? AppColors.nightSurface : AppColors.surface,
     );
 
     final base = ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
-      scaffoldBackgroundColor:
-          isDark ? AppColors.night : scheme.surface,
+      scaffoldBackgroundColor: isDark ? AppColors.night : AppColors.cream,
       visualDensity: VisualDensity.adaptivePlatformDensity,
     );
 
@@ -35,38 +35,65 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
         elevation: 0,
-        foregroundColor: scheme.onSurface,
+        foregroundColor: isDark ? Colors.white : AppColors.ink,
+        titleTextStyle: TextStyle(
+          color: isDark ? Colors.white : AppColors.ink,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(52),
+          backgroundColor: AppColors.seed,
+          foregroundColor: Colors.white,
+          minimumSize: const Size.fromHeight(54),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(18),
           ),
           textStyle: const TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
         ),
+      ),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: AppColors.seed,
+        foregroundColor: Colors.white,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: isDark
-            ? Colors.white.withValues(alpha: 0.05)
-            : Colors.black.withValues(alpha: 0.04),
+            ? Colors.white.withValues(alpha: 0.06)
+            : const Color(0xFFFFEFE2),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
         ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
       cardTheme: CardThemeData(
-        elevation: 0,
-        color: scheme.surface,
+        elevation: 2,
+        shadowColor: AppColors.seed.withValues(alpha: 0.18),
+        color: isDark ? AppColors.nightSurface : AppColors.surface,
+        surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(22),
         ),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? AppColors.seed : null,
+        ),
+        trackColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected)
+              ? AppColors.seed.withValues(alpha: 0.45)
+              : null,
+        ),
+      ),
+      chipTheme: base.chipTheme.copyWith(
+        backgroundColor: AppColors.accent.withValues(alpha: 0.25),
+        side: BorderSide.none,
       ),
     );
   }

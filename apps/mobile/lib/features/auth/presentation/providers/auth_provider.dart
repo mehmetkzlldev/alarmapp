@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -92,6 +94,35 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
         ),
       ),
     );
+  }
+
+  /// Dedup guard for the silent anonymous-session bootstrap.
+  Future<void>? _anonInFlight;
+
+  /// Provisions (or reuses) a silent anonymous session so the app works with no
+  /// visible login. Idempotent + deduped across concurrent calls — safe to call
+  /// early (kicked off during onboarding) and again on finish.
+  Future<void> ensureAnonymousSession({String? displayName}) {
+    if (state.valueOrNull?.isAuthenticated ?? false) {
+      return Future<void>.value();
+    }
+    return _anonInFlight ??=
+        _createAnonymous(displayName).whenComplete(() => _anonInFlight = null);
+  }
+
+  Future<void> _createAnonymous(String? displayName) async {
+    final seed = DateTime.now().microsecondsSinceEpoch;
+    final rnd = math.Random(seed);
+    final tag = List<int>.generate(20, (_) => rnd.nextInt(16))
+        .map((n) => n.toRadixString(16))
+        .join();
+    final email = 'anon-$seed-$tag@alarmapp.app';
+    // Always satisfies common complexity rules (upper, lower, digit, symbol).
+    final password = 'Aa1!$tag';
+    final name = (displayName != null && displayName.trim().isNotEmpty)
+        ? displayName.trim()
+        : 'Misafir';
+    await register(email: email, password: password, displayName: name);
   }
 
   /// Logs out, clears local state, and transitions to `unauthenticated`.

@@ -3,6 +3,7 @@
 class Routes {
   Routes._();
 
+  static const String onboarding = '/onboarding';
   static const String login = '/login';
   static const String register = '/register';
   static const String dashboard = '/dashboard';
@@ -25,6 +26,7 @@ class Routes {
   static const String paywall = '/paywall';
 
   // Named routes (mirror the paths).
+  static const String nOnboarding = 'onboarding';
   static const String nLogin = 'login';
   static const String nRegister = 'register';
   static const String nDashboard = 'dashboard';

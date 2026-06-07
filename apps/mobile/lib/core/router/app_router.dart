@@ -8,9 +8,8 @@ import 'package:alarmy/features/alarm_ring/presentation/screens/alarm_ring_scree
 import 'package:alarmy/features/alarms/presentation/screens/alarm_create_screen.dart';
 import 'package:alarmy/features/alarms/presentation/screens/alarm_list_screen.dart';
 import 'package:alarmy/features/auth/presentation/providers/auth_provider.dart';
-import 'package:alarmy/features/auth/presentation/screens/login_screen.dart';
-import 'package:alarmy/features/auth/presentation/screens/register_screen.dart';
 import 'package:alarmy/features/dashboard/presentation/screens/dashboard_screen.dart';
+import 'package:alarmy/features/onboarding/onboarding_screen.dart';
 import 'package:alarmy/features/settings/presentation/screens/settings_screen.dart';
 import 'package:alarmy/features/statistics/presentation/screens/statistics_screen.dart';
 import 'package:alarmy/features/subscription/presentation/screens/paywall_screen.dart';
@@ -40,13 +39,13 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.onDispose(refresh.dispose);
 
   return GoRouter(
-    initialLocation: Routes.login,
+    initialLocation: Routes.dashboard,
     refreshListenable: refresh,
     debugLogDiagnostics: false,
     redirect: (context, state) {
       final authAsync = ref.read(authNotifierProvider);
       final loc = state.matchedLocation;
-      final isAuthRoute = loc == Routes.login || loc == Routes.register;
+      final isOnboarding = loc == Routes.onboarding;
 
       if (loc.startsWith('/alarm-ring/')) return null;
 
@@ -54,24 +53,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (authAsync.isLoading && !authAsync.hasValue) return null;
 
       final isAuthed = ref.read(isAuthenticatedProvider);
-      if (!isAuthed && !isAuthRoute) return Routes.login;
-      if (isAuthed && isAuthRoute) return Routes.dashboard;
+      // No visible login: unauthenticated users go through onboarding, which
+      // silently provisions an anonymous account in the background.
+      if (!isAuthed) return isOnboarding ? null : Routes.onboarding;
+      // Authed users stay put. Onboarding routes to /dashboard itself on finish,
+      // so we don't bounce them out mid-questionnaire when the session lands.
       return null;
     },
     routes: [
       GoRoute(
-        path: Routes.login,
-        name: Routes.nLogin,
-        builder: (context, __) => LoginScreen(
-          onNavigateToRegister: () => context.go(Routes.register),
-        ),
-      ),
-      GoRoute(
-        path: Routes.register,
-        name: Routes.nRegister,
-        builder: (context, __) => RegisterScreen(
-          onNavigateToLogin: () => context.go(Routes.login),
-        ),
+        path: Routes.onboarding,
+        name: Routes.nOnboarding,
+        builder: (_, __) => const OnboardingScreen(),
       ),
       GoRoute(
         path: Routes.dashboard,

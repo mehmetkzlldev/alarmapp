@@ -25,7 +25,9 @@ class AlarmyApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
+      // Force the bright "Mango Sunrise" light theme regardless of the device's
+      // dark-mode setting (the app should feel colorful, not dim).
+      themeMode: ThemeMode.light,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: router,

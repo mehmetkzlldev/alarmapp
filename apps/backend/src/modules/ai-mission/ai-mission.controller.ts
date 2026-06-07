@@ -20,6 +20,7 @@ import {
   CompleteMissionDto,
   CompleteMissionResponseDto,
 } from './dto/complete-mission.dto';
+import { GenerateCustomMissionDto } from './dto/generate-custom-mission.dto';
 
 /**
  * Routes:
@@ -39,6 +40,20 @@ export class AiMissionController {
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<TodayMissionDto> {
     return this.service.getToday(user.id);
+  }
+
+  /**
+   * Premium "AI mission designer": generate a custom mission from the user's
+   * own description. Premium gating is enforced in the app UI/paywall; left
+   * open here so the feature is fully testable in the demo build.
+   */
+  @Post('custom')
+  @HttpCode(HttpStatus.OK)
+  async generateCustom(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: GenerateCustomMissionDto,
+  ): Promise<TodayMissionDto> {
+    return this.service.generateCustom(user.id, dto.prompt, dto.difficulty);
   }
 
   @Post(':id/complete')
