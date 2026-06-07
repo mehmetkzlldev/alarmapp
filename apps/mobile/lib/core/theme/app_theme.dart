@@ -27,6 +27,13 @@ class AppTheme {
       colorScheme: scheme,
       scaffoldBackgroundColor: isDark ? AppColors.night : AppColors.cream,
       visualDensity: VisualDensity.adaptivePlatformDensity,
+      // Smooth, consistent fade + subtle slide for every page push.
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: _FadeSlidePageTransitionsBuilder(),
+          TargetPlatform.iOS: _FadeSlidePageTransitionsBuilder(),
+        },
+      ),
     );
 
     return base.copyWith(
@@ -94,6 +101,34 @@ class AppTheme {
       chipTheme: base.chipTheme.copyWith(
         backgroundColor: AppColors.accent.withValues(alpha: 0.25),
         side: BorderSide.none,
+      ),
+    );
+  }
+}
+
+/// A smooth fade + subtle upward-slide page transition, applied app-wide via
+/// [PageTransitionsTheme] so every Navigator/GoRouter push feels fluid.
+class _FadeSlidePageTransitionsBuilder extends PageTransitionsBuilder {
+  const _FadeSlidePageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final curved =
+        CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+    return FadeTransition(
+      opacity: curved,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.04),
+          end: Offset.zero,
+        ).animate(curved),
+        child: child,
       ),
     );
   }

@@ -35,6 +35,10 @@ abstract class MissionsRemoteDataSource {
     required String targetObject,
   });
   Future<AiMission> getTodayAiMission();
+  Future<AiMission> generateCustomAiMission({
+    required String prompt,
+    String? difficulty,
+  });
   Future<void> completeAiMission({required String id, String? imageS3Key});
   Future<MissionHistory> recordHistory(RecordHistoryParams params);
 }
@@ -153,6 +157,18 @@ class MissionsRemoteDataSourceImpl implements MissionsRemoteDataSource {
   Future<AiMission> getTodayAiMission() async {
     final res = await _client.get<Map<String, dynamic>>(
       ApiEndpoints.aiMissionToday,
+    );
+    return AiMissionModel.fromJson(res.data!);
+  }
+
+  @override
+  Future<AiMission> generateCustomAiMission({
+    required String prompt,
+    String? difficulty,
+  }) async {
+    final res = await _client.post<Map<String, dynamic>>(
+      ApiEndpoints.aiMissionCustom,
+      data: {'prompt': prompt, if (difficulty != null) 'difficulty': difficulty},
     );
     return AiMissionModel.fromJson(res.data!);
   }

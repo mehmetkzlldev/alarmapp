@@ -2,90 +2,267 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:alarmy/l10n/app_localizations.dart';
+import 'package:alarmy/core/theme/app_colors.dart';
+import '../../../ai_generator/ai_generator_screen.dart';
 import '../../../alarm_ring/presentation/screens/wake_challenge_screen.dart';
 import '../../../alarms/domain/entities/alarm_entity.dart';
 import '../../../alarms/presentation/providers/alarms_provider.dart';
 import '../../../alarms/presentation/screens/alarm_create_screen.dart';
 import '../../../alarms/presentation/screens/alarm_list_screen.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../onboarding/sleep_recommendation.dart';
 
-/// Home dashboard.
-///
-/// Shows, top to bottom:
-///   1. the next alarm that will fire (derived from the alarms feature),
-///   2. today's AI mission (premium-gated; falls back to an upsell),
-///   3. quick sleep stats, and
-///   4. quick navigation to the alarms list.
-///
-/// The AI-mission and stats cards read [todaysAiMissionProvider] and
-/// [quickStatsProvider]. Those default to "not loaded" sentinels and are meant
-/// to be overridden by the ai-missions / sleep features once wired; the
-/// dashboard renders gracefully in the meantime.
-class DashboardScreen extends ConsumerWidget {
+/// Home dashboard — bright "Mango Sunrise" theme with staggered entrance
+/// animations, a personalized sleep-recommendation card, the premium AI mission
+/// designer entry, and quick actions.
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen>
+    with TickerProviderStateMixin {
+  late final AnimationController _enter;
+  late final AnimationController _pulse;
+
+  @override
+  void initState() {
+    super.initState();
+    _enter = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 750),
+    )..forward();
+    _pulse = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2200),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _enter.dispose();
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  bool get _isTr => Localizations.localeOf(context).languageCode == 'tr';
+
+  /// Staggered fade + slide-up for the card at [index].
+  Widget _staggered(int index, Widget child) {
+    final start = (index * 0.09).clamp(0.0, 0.7);
+    final anim = CurvedAnimation(
+      parent: _enter,
+      curve: Interval(start, (start + 0.5).clamp(0.0, 1.0),
+          curve: Curves.easeOutCubic),
+    );
+    return AnimatedBuilder(
+      animation: anim,
+      builder: (context, c) => Opacity(
+        opacity: anim.value,
+        child: Transform.translate(
+          offset: Offset(0, 26 * (1 - anim.value)),
+          child: c,
+        ),
+      ),
+      child: child,
+    );
+  }
+
+  void _openAlarms() => Navigator.of(context)
+      .push(MaterialPageRoute(builder: (_) => const AlarmListScreen()));
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final nextAlarm = ref.watch(nextAlarmProvider);
     final alarmsAsync = ref.watch(alarmsNotifierProvider);
+    final user = ref.watch(currentUserProvider);
+    final recAsync = ref.watch(sleepRecommendationProvider);
+
+    final name = user?.displayName.trim() ?? '';
+    final showName = name.isNotEmpty && name.toLowerCase() != 'misafir';
+
+    var i = 0;
+    final cards = <Widget>[];
+    final rec = recAsync.valueOrNull;
+    if (rec != null) {
+      cards.add(_staggered(i++, _SleepRecCard(rec: rec, isTr: _isTr)));
+    }
+    cards.add(_staggered(
+      i++,
+      _NextAlarmCard(
+        alarm: nextAlarm,
+        loading: alarmsAsync.isLoading && !alarmsAsync.hasValue,
+        onTap: _openAlarms,
+      ),
+    ));
+    cards.add(_staggered(i++, _AiDesignerCard(pulse: _pulse, isTr: _isTr)));
+    cards.add(_staggered(i++, _ActionTile(
+      emoji: '🔥',
+      title: l10n.dashTryChallengeTitle,
+      subtitle: l10n.dashTryChallengeSubtitle,
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const WakeChallengeScreen()),
+      ),
+    )));
+    cards.add(_staggered(i++, _ActionTile(
+      emoji: '⏰',
+      title: l10n.dashNavAlarmsTitle,
+      subtitle: l10n.dashNavAlarmsSubtitle,
+      onTap: _openAlarms,
+    )));
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.dashGoodMorning),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.list_alt),
-            tooltip: l10n.dashAllAlarms,
-            onPressed: () => _openAlarms(context),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const AlarmCreateScreen()),
         ),
-        child: const Icon(Icons.add_alarm),
+        icon: const Icon(Icons.add_alarm),
+        label: Text(_isTr ? 'Alarm Kur' : 'Add alarm'),
       ),
-      body: RefreshIndicator(
-        onRefresh: () => ref.read(alarmsNotifierProvider.notifier).refresh(),
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            _NextAlarmCard(
-              alarm: nextAlarm,
-              loading: alarmsAsync.isLoading && !alarmsAsync.hasValue,
-              onTap: () => _openAlarms(context),
-            ),
-            const SizedBox(height: 16),
-            Card(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              child: ListTile(
-                leading: const Icon(Icons.alarm_on),
-                title: Text(l10n.dashTryChallengeTitle),
-                subtitle: Text(l10n.dashTryChallengeSubtitle),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const WakeChallengeScreen(),
+      body: Container(
+        decoration: const BoxDecoration(gradient: AppColors.bgGradient),
+        child: SafeArea(
+          child: RefreshIndicator(
+            color: AppColors.seed,
+            onRefresh: () =>
+                ref.read(alarmsNotifierProvider.notifier).refresh(),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(18, 8, 18, 96),
+              children: [
+                _staggered(
+                  0,
+                  _Header(
+                    greeting: l10n.dashGoodMorning,
+                    name: showName ? name : null,
+                    onAlarms: _openAlarms,
                   ),
                 ),
-              ),
+                const SizedBox(height: 18),
+                for (final c in cards) ...[c, const SizedBox(height: 14)],
+              ],
             ),
-            const SizedBox(height: 16),
-            const _AiMissionCard(),
-            const SizedBox(height: 16),
-            const _QuickStatsCard(),
-            const SizedBox(height: 16),
-            _DashboardNav(onOpenAlarms: () => _openAlarms(context)),
-          ],
+          ),
         ),
       ),
     );
   }
+}
 
-  void _openAlarms(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const AlarmListScreen()),
+// ---------------------------------------------------------------------------
+// Header
+// ---------------------------------------------------------------------------
+
+class _Header extends StatelessWidget {
+  const _Header({required this.greeting, required this.name, required this.onAlarms});
+
+  final String greeting;
+  final String? name;
+  final VoidCallback onAlarms;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Text('☀️', style: TextStyle(fontSize: 34)),
+        const SizedBox(width: 12),
+        Expanded(
+          child: ShaderMask(
+            shaderCallback: (r) => AppColors.brandGradient.createShader(r),
+            child: Text(
+              name == null ? greeting : '$greeting,\n$name',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 26,
+                fontWeight: FontWeight.w900,
+                height: 1.1,
+              ),
+            ),
+          ),
+        ),
+        IconButton(
+          onPressed: onAlarms,
+          icon: const Icon(Icons.list_alt_rounded, color: AppColors.ink),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Sleep recommendation card
+// ---------------------------------------------------------------------------
+
+class _SleepRecCard extends StatelessWidget {
+  const _SleepRecCard({required this.rec, required this.isTr});
+
+  final SleepRecommendation rec;
+  final bool isTr;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.seed.withValues(alpha: 0.12),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('🌙', style: TextStyle(fontSize: 22)),
+              const SizedBox(width: 8),
+              Text(
+                isTr ? 'Önerilen yatış saatin' : 'Your target bedtime',
+                style: TextStyle(
+                  color: AppColors.ink.withValues(alpha: 0.6),
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ShaderMask(
+            shaderCallback: (r) => AppColors.brandGradient.createShader(r),
+            child: Text(
+              rec.windowLabel,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.accent.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Text(
+              rec.tip(isTr),
+              style: TextStyle(
+                color: AppColors.ink.withValues(alpha: 0.85),
+                fontSize: 13.5,
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -107,47 +284,75 @@ class _NextAlarmCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
-    return Card(
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(22),
       elevation: 2,
+      shadowColor: AppColors.seed.withValues(alpha: 0.15),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(22),
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Row(
             children: [
-              const Icon(Icons.alarm, size: 36),
+              Container(
+                width: 52,
+                height: 52,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  gradient: AppColors.brandGradient,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(Icons.alarm, color: Colors.white, size: 28),
+              ),
               const SizedBox(width: 16),
               Expanded(
                 child: loading
-                    ? const _CardSkeleton()
+                    ? const _Skeleton()
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(l10n.dashNextAlarm,
-                              style: theme.textTheme.labelLarge),
-                          const SizedBox(height: 4),
+                          Text(
+                            l10n.dashNextAlarm,
+                            style: TextStyle(
+                              color: AppColors.ink.withValues(alpha: 0.55),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
                           if (alarm == null)
-                            Text(l10n.dashNoActiveAlarms,
-                                style: theme.textTheme.titleLarge)
+                            Text(
+                              l10n.dashNoActiveAlarms,
+                              style: const TextStyle(
+                                color: AppColors.ink,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            )
                           else ...[
                             Text(
                               _formatTime(context, alarm!),
-                              style: theme.textTheme.displaySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
+                              style: const TextStyle(
+                                color: AppColors.ink,
+                                fontSize: 32,
+                                fontWeight: FontWeight.w900,
                               ),
                             ),
                             Text(
                               _subtitle(l10n, alarm!),
-                              style: theme.textTheme.bodyMedium,
+                              style: TextStyle(
+                                color: AppColors.ink.withValues(alpha: 0.6),
+                              ),
                             ),
                           ],
                         ],
                       ),
               ),
-              const Icon(Icons.chevron_right),
+              Icon(Icons.chevron_right,
+                  color: AppColors.ink.withValues(alpha: 0.4)),
             ],
           ),
         ),
@@ -174,287 +379,206 @@ class _NextAlarmCard extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// AI mission card (premium-gated)
+// AI Mission Designer card (premium entry) — the flashy one
 // ---------------------------------------------------------------------------
 
-/// Lightweight view model for `GET /ai-missions/today`. Kept here (not in a
-/// feature folder) so the dashboard compiles independently; replace with the
-/// ai-missions feature's provider via override when available.
-class TodaysAiMission {
-  const TodaysAiMission({
-    required this.id,
-    required this.instruction,
-    required this.targetObject,
-    required this.premiumLocked,
-  });
+class _AiDesignerCard extends StatelessWidget {
+  const _AiDesignerCard({required this.pulse, required this.isTr});
 
-  /// Sentinel for a not-yet-loaded / unavailable mission.
-  const TodaysAiMission.none()
-      : id = null,
-        instruction = null,
-        targetObject = null,
-        premiumLocked = false;
-
-  /// Sentinel shown to free users hitting the premium gate.
-  const TodaysAiMission.locked()
-      : id = null,
-        instruction = null,
-        targetObject = null,
-        premiumLocked = true;
-
-  final String? id;
-  final String? instruction;
-  final String? targetObject;
-  final bool premiumLocked;
-
-  bool get hasMission => id != null;
-}
-
-/// Override this in ProviderScope with the real ai-missions provider.
-final todaysAiMissionProvider = Provider<AsyncValue<TodaysAiMission>>(
-  (ref) => const AsyncData(TodaysAiMission.none()),
-);
-
-class _AiMissionCard extends ConsumerWidget {
-  const _AiMissionCard();
+  final Animation<double> pulse;
+  final bool isTr;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context);
-    final async = ref.watch(todaysAiMissionProvider);
-
-    return Card(
-      color: theme.colorScheme.secondaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Icon(Icons.auto_awesome, size: 32),
-            const SizedBox(width: 16),
-            Expanded(
-              child: async.when(
-                loading: () => const _CardSkeleton(),
-                error: (_, __) => Text(
-                  l10n.dashAiMissionUnavailable,
-                  style: theme.textTheme.bodyMedium,
-                ),
-                data: (mission) => _content(context, mission),
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: pulse,
+      builder: (context, child) {
+        final t = pulse.value;
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.gradientEnd.withValues(alpha: 0.25 + 0.25 * t),
+                blurRadius: 18 + 10 * t,
+                offset: const Offset(0, 8),
               ),
+            ],
+          ),
+          child: child,
+        );
+      },
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(22),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(22),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const AiGeneratorScreen()),
+          ),
+          child: Ink(
+            decoration: BoxDecoration(
+              gradient: AppColors.brandGradient,
+              borderRadius: BorderRadius.circular(22),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _content(BuildContext context, TodaysAiMission mission) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context);
-    if (mission.premiumLocked) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.dashAiMissionTitle, style: theme.textTheme.labelLarge),
-          const SizedBox(height: 4),
-          Text(l10n.dashAiMissionUnlock,
-              style: theme.textTheme.bodyMedium),
-          const SizedBox(height: 8),
-          FilledButton.tonal(
-            onPressed: () {}, // subscriptions feature handles purchase flow
-            child: Text(l10n.dashGoPremium),
-          ),
-        ],
-      );
-    }
-    if (!mission.hasMission) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.dashAiMissionTitle, style: theme.textTheme.labelLarge),
-          const SizedBox(height: 4),
-          Text(l10n.dashAiMissionNone,
-              style: theme.textTheme.bodyMedium),
-        ],
-      );
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(l10n.dashAiMissionTitle, style: theme.textTheme.labelLarge),
-        const SizedBox(height: 4),
-        Text(
-          mission.instruction ?? '',
-          style: theme.textTheme.titleMedium,
-        ),
-        if (mission.targetObject != null) ...[
-          const SizedBox(height: 4),
-          Chip(
-            avatar: const Icon(Icons.center_focus_strong, size: 16),
-            label: Text(mission.targetObject!),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Quick stats card
-// ---------------------------------------------------------------------------
-
-/// Minimal view model for the dashboard's quick stats, sourced from
-/// `GET /sleep/statistics?range=week`.
-class QuickStats {
-  const QuickStats({
-    required this.avgDurationMin,
-    required this.consistencyScore,
-    required this.missionSuccessRate,
-  });
-
-  const QuickStats.empty()
-      : avgDurationMin = 0,
-        consistencyScore = 0,
-        missionSuccessRate = 0;
-
-  final int avgDurationMin;
-  final double consistencyScore; // 0..1
-  final double missionSuccessRate; // 0..1
-}
-
-/// Override in ProviderScope with the sleep feature's provider when wired.
-final quickStatsProvider = Provider<AsyncValue<QuickStats>>(
-  (ref) => const AsyncData(QuickStats.empty()),
-);
-
-class _QuickStatsCard extends ConsumerWidget {
-  const _QuickStatsCard();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context);
-    final async = ref.watch(quickStatsProvider);
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.dashThisWeek, style: theme.textTheme.titleMedium),
-            const SizedBox(height: 12),
-            async.when(
-              loading: () => const _CardSkeleton(),
-              error: (_, __) => Text(l10n.dashStatsUnavailable,
-                  style: theme.textTheme.bodyMedium),
-              data: (s) => Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Row(
                 children: [
-                  _Stat(
-                    label: l10n.dashStatAvgSleep,
-                    value: _formatDuration(l10n, s.avgDurationMin),
-                    icon: Icons.bedtime_outlined,
+                  const Text('✨', style: TextStyle(fontSize: 34)),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              isTr ? 'AI Görev Üreteci' : 'AI Mission Designer',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: ShaderMask(
+                                shaderCallback: (r) =>
+                                    AppColors.brandGradient.createShader(r),
+                                child: const Text(
+                                  'PREMIUM',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          isTr
+                              ? 'Hayalindeki uyandırma görevini AI tasarlasın ✦'
+                              : 'Let AI design your dream wake-up mission ✦',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.92),
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  _Stat(
-                    label: l10n.dashStatConsistency,
-                    value: '${(s.consistencyScore * 100).round()}%',
-                    icon: Icons.trending_up,
-                  ),
-                  _Stat(
-                    label: l10n.dashStatMissions,
-                    value: '${(s.missionSuccessRate * 100).round()}%',
-                    icon: Icons.task_alt,
-                  ),
+                  const Icon(Icons.chevron_right, color: Colors.white),
                 ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
   }
-
-  String _formatDuration(AppLocalizations l10n, int minutes) {
-    if (minutes <= 0) return '--';
-    final h = minutes ~/ 60;
-    final m = minutes % 60;
-    return l10n.dashDurationHm(h, m);
-  }
-}
-
-class _Stat extends StatelessWidget {
-  const _Stat({required this.label, required this.value, required this.icon});
-
-  final String label;
-  final String value;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      children: [
-        Icon(icon, size: 24, color: theme.colorScheme.primary),
-        const SizedBox(height: 4),
-        Text(value, style: theme.textTheme.titleMedium),
-        Text(label, style: theme.textTheme.labelSmall),
-      ],
-    );
-  }
 }
 
 // ---------------------------------------------------------------------------
-// Bottom nav shortcuts
+// Generic action tile
 // ---------------------------------------------------------------------------
 
-class _DashboardNav extends StatelessWidget {
-  const _DashboardNav({required this.onOpenAlarms});
+class _ActionTile extends StatelessWidget {
+  const _ActionTile({
+    required this.emoji,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
 
-  final VoidCallback onOpenAlarms;
+  final String emoji;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Card(
-      child: Column(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.alarm),
-            title: Text(l10n.dashNavAlarmsTitle),
-            subtitle: Text(l10n.dashNavAlarmsSubtitle),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: onOpenAlarms,
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      elevation: 1.5,
+      shadowColor: AppColors.seed.withValues(alpha: 0.12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.accent.withValues(alpha: 0.22),
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: Text(emoji, style: const TextStyle(fontSize: 22)),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title,
+                        style: const TextStyle(
+                            color: AppColors.ink,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800)),
+                    Text(subtitle,
+                        style: TextStyle(
+                            color: AppColors.ink.withValues(alpha: 0.6),
+                            fontSize: 13)),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right,
+                  color: AppColors.ink.withValues(alpha: 0.4)),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// Shared skeleton placeholder
+// Skeleton placeholder
 // ---------------------------------------------------------------------------
 
-class _CardSkeleton extends StatelessWidget {
-  const _CardSkeleton();
+class _Skeleton extends StatelessWidget {
+  const _Skeleton();
 
   @override
   Widget build(BuildContext context) {
-    final base = Theme.of(context).colorScheme.onSurface.withOpacity(0.08);
-    Widget bar(double width, double height) => Container(
-          width: width,
-          height: height,
+    Widget bar(double w, double h) => Container(
+          width: w,
+          height: h,
           margin: const EdgeInsets.only(bottom: 8),
           decoration: BoxDecoration(
-            color: base,
+            color: AppColors.ink.withValues(alpha: 0.07),
             borderRadius: BorderRadius.circular(4),
           ),
         );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [bar(120, 12), bar(180, 20)],
+      children: [bar(110, 12), bar(170, 22)],
     );
   }
 }

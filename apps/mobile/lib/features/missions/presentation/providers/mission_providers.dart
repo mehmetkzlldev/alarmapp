@@ -6,6 +6,7 @@ import '../../data/datasources/missions_remote_datasource.dart';
 import '../../data/repositories/missions_repository_impl.dart';
 import '../../domain/repositories/missions_repository.dart';
 import '../../domain/usecases/generate_math.dart';
+import '../../domain/usecases/generate_custom_ai_mission.dart';
 import '../../domain/usecases/get_today_ai_mission.dart';
 import '../../domain/usecases/record_history.dart';
 import '../../domain/usecases/verify_math.dart';
@@ -57,6 +58,10 @@ final verifyObjectProvider = Provider<VerifyObject>(
 
 final getTodayAiMissionProvider = Provider<GetTodayAiMission>(
   (ref) => GetTodayAiMission(ref.watch(missionsRepositoryProvider)),
+);
+
+final generateCustomAiMissionProvider = Provider<GenerateCustomAiMission>(
+  (ref) => GenerateCustomAiMission(ref.watch(missionsRepositoryProvider)),
 );
 
 final recordHistoryProvider = Provider<RecordHistory>(

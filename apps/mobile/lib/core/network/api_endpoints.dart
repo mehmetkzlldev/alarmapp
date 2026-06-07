@@ -27,6 +27,7 @@ class ApiEndpoints {
 
   // ---- AI missions (premium) ---------------------------------------------
   static const String aiMissionToday = '/ai-missions/today';
+  static const String aiMissionCustom = '/ai-missions/custom';
   static String aiMissionComplete(String id) => '/ai-missions/$id/complete';
 
   // ---- Statistics (premium) ----------------------------------------------

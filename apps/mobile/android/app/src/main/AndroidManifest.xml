@@ -29,7 +29,7 @@
 
     <application
         android:name="${applicationName}"
-        android:label="AI Alarm"
+        android:label="WakeUp AI"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
 

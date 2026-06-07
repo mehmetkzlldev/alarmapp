@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:alarmy/core/network/network_providers.dart';
 import 'package:alarmy/core/usecase/usecase.dart';
@@ -257,9 +258,37 @@ final subscriptionProvider =
 /// final premium = ref.watch(isPremiumProvider);
 /// if (!premium) context.go(Routes.paywall);
 /// ```
+/// Local "demo" premium unlock. This build is not wired to a live store, so the
+/// paywall's purchase grants premium LOCALLY (persisted) — making the premium
+/// features fully testable. Swap for real IAP entitlement in production.
+class DemoPremiumNotifier extends Notifier<bool> {
+  static const String _key = 'demo.premium';
+
+  @override
+  bool build() {
+    _load();
+    return false;
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    state = prefs.getBool(_key) ?? false;
+  }
+
+  Future<void> unlock() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_key, true);
+    state = true;
+  }
+}
+
+final demoPremiumProvider =
+    NotifierProvider<DemoPremiumNotifier, bool>(DemoPremiumNotifier.new);
+
 final isPremiumProvider = Provider<bool>((ref) {
-  final asyncState = ref.watch(subscriptionProvider);
-  return asyncState.valueOrNull?.isPremium ?? false;
+  final real = ref.watch(subscriptionProvider).valueOrNull?.isPremium ?? false;
+  final demo = ref.watch(demoPremiumProvider);
+  return real || demo;
 });
 
 /// The list of plans for the paywall, sourced from the loaded state.

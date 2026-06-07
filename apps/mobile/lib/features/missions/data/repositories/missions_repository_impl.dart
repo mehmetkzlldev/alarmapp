@@ -87,6 +87,16 @@ class MissionsRepositoryImpl implements MissionsRepository {
       _guard(_remote.getTodayAiMission);
 
   @override
+  Future<Either<Failure, AiMission>> generateCustomAiMission({
+    required String prompt,
+    String? difficulty,
+  }) =>
+      _guard(() => _remote.generateCustomAiMission(
+            prompt: prompt,
+            difficulty: difficulty,
+          ));
+
+  @override
   Future<Either<Failure, Unit>> completeAiMission({
     required String id,
     String? imageS3Key,

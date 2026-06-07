@@ -1,5 +1,5 @@
 name: alarmy
-description: AI-powered alarm clock app (Alarmy-style) with object-detection and math missions.
+description: WakeUp AI — AI-powered alarm clock with object-detection and math missions.
 publish_to: "none"
 version: 1.0.0+1
 
@@ -98,6 +98,7 @@ dev_dependencies:
   json_serializable: ^6.8.0
   riverpod_generator: ^2.4.0
   injectable_generator: ^2.6.1
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
@@ -105,3 +106,13 @@ flutter:
   assets:
     - assets/sounds/
     - assets/images/
+
+# App launcher icon ("WakeUp AI" sunrise). Regenerate with:
+#   dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icon_master.png"
+  adaptive_icon_background: "#FF5A3C"
+  adaptive_icon_foreground: "assets/icon/icon_foreground.png"
+  remove_alpha_ios: true

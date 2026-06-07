@@ -71,7 +71,7 @@ async function bootstrap(): Promise<void> {
   // --- Swagger (disabled in production) ---
   if (!config.isProduction) {
     const swaggerConfig = new DocumentBuilder()
-      .setTitle('Alarmy API')
+      .setTitle('WakeUp AI API')
       .setDescription('AI alarm clock backend API')
       .setVersion('1.0')
       .addBearerAuth(
@@ -96,7 +96,7 @@ async function bootstrap(): Promise<void> {
   app.enableShutdownHooks();
 
   await app.listen(config.port, '0.0.0.0');
-  logger.log(`Alarmy backend listening on :${config.port} (env=${config.env})`);
+  logger.log(`WakeUp AI backend listening on :${config.port} (env=${config.env})`);
   logger.log(`API base path: /api/v1`);
   if (!config.isProduction) {
     logger.log(`Swagger docs: /docs`);

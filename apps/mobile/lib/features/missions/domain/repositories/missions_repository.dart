@@ -60,6 +60,13 @@ abstract class MissionsRepository {
   /// [PremiumRequiredFailure] is returned for free users.
   Future<Either<Failure, AiMission>> getTodayAiMission();
 
+  /// `POST /ai-missions/custom` — generate a custom mission from the user's
+  /// free-text [prompt] (the premium "AI mission designer").
+  Future<Either<Failure, AiMission>> generateCustomAiMission({
+    required String prompt,
+    String? difficulty,
+  });
+
   /// `POST /ai-missions/:id/complete` — mark the daily AI mission complete.
   Future<Either<Failure, Unit>> completeAiMission({
     required String id,

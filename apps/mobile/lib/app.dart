@@ -21,7 +21,7 @@ class AlarmyApp extends ConsumerWidget {
     ref.watch(alarmRingBootstrapProvider);
 
     return MaterialApp.router(
-      title: 'Alarmy',
+      title: 'WakeUp AI',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
